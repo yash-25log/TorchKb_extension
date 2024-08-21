@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "TorchKB",
+  "version": "2.0",
+  "description": "Torch Knowledge Base",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": ["*://api.openai.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScript.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icons/main-icon.png"
+  },
+  "icons": {
+    "16": "icons/main-icon.png",
+    "48": "icons/main-icon.png",
+    "128": "icons/main-icon.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/TorchKB.png","icons/main-icon.png","icons/Summarise.png", "icons/Ask.png", "icons/Save.png", "icons/Ask-hover.png", "icons/Summarise-hover.png", "icons/Save-hover.png","chatDrawer.css", "icons/Submit.png", "icons/Return.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+/* Positioning the floating button */
+#fab-container {
+    position: fixed;
+    right: 20px;
+    bottom: 300px; /* Adjust this value to position above the bottom bar */
+    z-index: 1000;
+    padding: 10px;
+}
+
+.floating-button {
+    position: relative;
+}
+
+/* Styling the main black rounded square icon with a white border */
+.main-icon {
+    width: 60px; /* Increased size for better visibility */
+    height: 60px;
+    background-color: #000;
+    border-radius: 10px; /* Slightly more rounded */
+    border: 8px solid white; /* Added white border */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25); /* Added subtle shadow */
+
+}
+
+/* Hover effect for the main icon with border */
+.main-icon:hover {
+    background-color: #333; /* Darker shade on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+    border-color: #e0e0e0; /* Slightly lighter border on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35); /* Stronger shadow on hover */
+
+}
+
+/* Drawer styling */
+.drawer {
+    position: absolute;
+    top: 70px; /* Adjusted to match new icon size */
+    right: 0;
+    display: none;
+    flex-direction: column;
+    gap: 12px; /* Increased gap for better spacing */
+    background-color: white;
+    border-radius: 12px;
+    padding: 10px; /* More padding for a roomier feel */
+    /* padding-top: 100px; */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25); /* Slightly stronger shadow */
+    transform: translateY(15px); /* Start slightly out of view */
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* When the drawer is open */
+.drawer.open {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Styling sub-icons inside the drawer */
+.sub-icon {
+    width: 50px; /* Increased size for better interaction */
+    height: 50px;
+    background-color: #000;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+/* Hover effect for sub-icons */
+.sub-icon:hover {
+    background-color: #333; /* Darker shade on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+.sub-icon img {
+    width: 30px; /* Adjusted to match larger sub-icon size */
+    height: 30px;
+}
+/* Tooltip styling */
+.tooltip {
+    visibility: hidden;
+    width: 140px; /* Slightly wider for better readability */
+    background-color: white; /* White background */
+    color: black; /* Black text */
+    text-align: center;
+    border-radius: 5px;
+    padding: 6px; /* More padding for improved appearance */
+    position: absolute;
+    right: 70px; /* Adjusted to position tooltip to the left of the sub-icon */
+    bottom: 50%;
+    transform: translateY(50%);
+    opacity: 0;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Show tooltip on hover */
+.sub-icon:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+
