@@ -6,11 +6,34 @@
     link.rel = 'stylesheet';
     document.head.appendChild(link);
 
+    const authDrawerLink = document.createElement('link');
+    authDrawerLink.href = chrome.runtime.getURL('authDrawer.css');
+    authDrawerLink.type = 'text/css';
+    authDrawerLink.rel = 'stylesheet';
+    document.head.appendChild(authDrawerLink);
 
 
 
+    const homePageScript = document.createElement('script');
+    homePageScript.src = chrome.runtime.getURL('homePage.js');
+    document.head.appendChild(homePageScript);
+    
     const fabContainer = document.createElement('div');
     fabContainer.id = 'fab-container';
+    function addTestButton() {
+        const testButton = document.createElement('button');
+        testButton.id = 'test-auth-drawer';
+        testButton.textContent = 'Test Auth Drawer';
+        testButton.style.position = 'fixed';
+        testButton.style.top = '10px';
+        testButton.style.left = '10px';
+        testButton.style.zIndex = '10000';
+        document.body.appendChild(testButton);
+    
+        testButton.addEventListener('click', () => {
+            createAuthDrawer();
+        });
+    }
 
     // Get the text content of the page and send it to the background script
     const pageText = document.body.innerText;
@@ -87,7 +110,6 @@
         //     console.log('Chat drawer already exists');
         //     return;
         // }
-
         const chatDrawer = document.createElement('div');
         chatDrawer.id = 'chat-drawer';
         chatDrawer.innerHTML = `
@@ -97,6 +119,7 @@
                 </div>
                 <div class="header-title">Torch KB - AI Powered Knowledge Base</div>
                 <div class="header-right">
+                    <button id="home-icon"><img src="${chrome.runtime.getURL('icons/Home.png')}" alt="Home"></button>
                     <button id="return-icon"><img src="${chrome.runtime.getURL('icons/Return.png')}" alt="Return"></button>
                 </div>
             </div>
@@ -111,13 +134,15 @@
                 Cultural References: The passage mentions cultural touchstones like The Wonder Years, classic movies, and significant trials, placing them in temporal contexts to give a sense of their historical proximity.</div>
             </div>
             <div class="chat-footer">
-                <input type="text" id="chat-input" placeholder="Start Chatting Now...">
-                <button id="submit-button"><img src="${chrome.runtime.getURL('icons/Submit.png')}" alt="Submit"></button>
-            </div>
+            <input type="text" id="chat-input" placeholder="Start Chatting Now...">
+            <button id="submit-button"><img src="${chrome.runtime.getURL('icons/Submit.png')}" alt="Submit"></button>
+        </div>
         `;
         // chatDrawer.style.opacity = '1';
         // chatDrawer.style.display = 'flex';
 
+
+        
         document.body.appendChild(chatDrawer);
         // Add this line to make the drawer visible
         setTimeout(() => {
@@ -137,15 +162,48 @@
             drawer.style.display = 'flex'; // Show main drawer
             drawer.classList.add('open');
         });
+        document.getElementById('submit-button').addEventListener('click', () => {
+            console.log('Query submitted');
+            if (!localStorage.getItem('authShown')) {
+                document.getElementById('chat-drawer').style.display = 'none';
+                createAuthDrawer();
+                localStorage.setItem('authShown', 'true');
+            } else {
+                // Handle normal submit functionality here
+                console.log('Query submitted');
+            }
+        });
+    
+    }
+    // Update the home icon click event listener
+    function attachHomeIconListener() {
+        const homeIcon = document.getElementById('home-icon');
+        if (homeIcon) {
+            homeIcon.addEventListener('click', () => {
+                console.log('Home icon clicked');
+                chrome.runtime.sendMessage({action: 'showHomePage'});
+            });
+        } else {
+            setTimeout(attachHomeIconListener, 500);
+        }
     }
 
+    // Call this function after the chat drawer is created
+    attachHomeIconListener();
+
     // Listen for messages from background script
-    chrome.runtime.onMessage.addListener((message) => {
-        if (message.action === 'showSummary') {
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message.action === "showSummaryInChatDrawer") {
             const chatBody = document.querySelector('.chat-body');
-            chatBody.innerHTML = `<div class="chat-message ai-message">${message.summary}</div>`;
+            if (chatBody) {
+                chatBody.innerHTML = `
+                    <div class="chat-message user-message">Summarise & provide the key take aways from this article…</div>
+                    <div class="chat-message ai-message">${message.summary}</div>
+                `;
+            }
         }
     });
+    
 
      // Function to handle icon change on hover or click
      function changeIconOnHoverAndClick(subIconId, defaultIcon, hoverIcon, clickIcon) {
@@ -176,27 +234,21 @@
             iconImage.src = clickIcon;
         });
     }
-
-
     // Replace icons on hover and click for each sub-icon
     changeIconOnHoverAndClick('summarize', 
         chrome.runtime.getURL('icons/Summarise.png'), 
         chrome.runtime.getURL('icons/Summarise-hover.png'),
         chrome.runtime.getURL('icons/Summarise-hover.png'));
 
-
     changeIconOnHoverAndClick('ask', 
         chrome.runtime.getURL('icons/Ask.png'), 
         chrome.runtime.getURL('icons/Ask-hover.png'),
         chrome.runtime.getURL('icons/Ask-hover.png'));
 
-
     changeIconOnHoverAndClick('save', 
         chrome.runtime.getURL('icons/Save.png'), 
         chrome.runtime.getURL('icons/Save-hover.png'),
         chrome.runtime.getURL('icons/Save-hover.png'));
-
-    
 
     // Add event listener for the "Summarize" sub-icon
     document.getElementById('summarize').addEventListener('click', () => {
@@ -212,8 +264,80 @@
     document.getElementById('save').addEventListener('click', () => {
         console.log('Save this page');  // Trigger save functionality
     });
-
-   
+    function tryShowHomePage() {
+        if (typeof window.showHomePage === 'function') {
+            window.showHomePage();
+        } else {
+            console.log('showHomePage function not available yet, retrying...');
+            setTimeout(tryShowHomePage, 100);
+        }
+    }
     
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === 'executeShowHomePage') {
+            tryShowHomePage();
+
+        }
+    });
+    
+    function createAuthDrawer() {
+        const authDrawer = document.createElement('div');
+    authDrawer.id = 'auth-drawer';
+    authDrawer.innerHTML = `
+        <img src="${chrome.runtime.getURL('icons/close.png')}" alt="Close" id="close-auth-drawer">
+        <div class="auth-content">
+            <div class="header-content">
+                <img src="${chrome.runtime.getURL('icons/torchKb.png')}" alt="Torch KB" class="torch-kb-logo">
+                <h1>Torch KB</h1>
+            </div>
+            <h2>Your AI Powered Knowledge Base</h2>
+            <p>Summarise, Organise, Interact, Revise & Create Quizzes With Your YouTube Knowledge Base</p>
+            <button id="auth-button">Sign Up / Log In</button>
+        </div>
+    `;
+    document.body.appendChild(authDrawer);
+
+    document.getElementById('close-auth-drawer').addEventListener('click', () => {
+        authDrawer.style.display = 'none';
+        document.getElementById('test-auth-drawer').style.display = 'block';
+        document.getElementById('fab-container').style.display = 'block';
+    });
+
+    
+        document.getElementById('auth-button').addEventListener('click', () => {
+            // Implement authentication logic here
+            console.log('Authentication button clicked');
+        });
+    }
+    
+    
+    
+    
+
+    
+// Modify the existing event listener for the main icon
+// mainIcon.addEventListener('click', function() {
+//     if (!localStorage.getItem('authShown')) {
+//         createAuthDrawer();
+//         fabContainer.style.display = 'none';
+//         localStorage.setItem('authShown', 'true');
+//     } else {
+//         if (drawer.classList.contains('open')) {
+//             drawer.classList.remove('open');
+//             setTimeout(() => {
+//                 drawer.style.display = 'none';
+//             }, 300);
+//         } else {
+//             drawer.style.display = 'flex';
+//             setTimeout(() => {
+//                 drawer.classList.add('open');
+//             }, 10);
+//         }
+//     }
+// });
+
+addTestButton();
+
+
 
 })();
